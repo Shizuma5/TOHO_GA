@@ -1,0 +1,17 @@
+fileID = FOPEN("top.txt", F_READ) // 読み込みモードでファイルを開く
+wfile = FOPEN("top_num.txt", F_WRITE)
+
+i = 1
+while i < 77
+  record = FGET(fileID, i)
+  rfile = FOPEN(record, F_READ)
+    t = FGET(rfile, 1)
+  FCLOSE(rfile)
+  fput(wfile, length(t))
+  print (length(t))
+  i = i + 1
+wend
+
+FCLOSE(wfile)
+
+FCLOSE(fileID)

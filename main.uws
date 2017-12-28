@@ -1,0 +1,51 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+
+fileID = FOPEN("firstlog2.txt", F_READ) // 読み込みモードでファイルを開く
+record = FGET(fileID, 1)
+FCLOSE(fileID)
+
+i = 1
+
+//ゲームキャラクターの装備選択画面からスタート
+sleep(1)
+KBD(VK_Z, DOWN)
+sleep(1)
+KBD(VK_Z, UP)
+sleep(0.1)
+KBD(VK_LSHIFT, DOWN)
+
+while i <= LENGTH(record)
+  KBD(VK_Z, DOWN, 0.05)
+  direction = Copy(record, i, 1)
+  IFB direction = "L" then
+    KBD(VK_LEFT, DOWN)
+    sleep(0.15)
+    KBD(VK_LEFT, UP)
+  ELSEIF direction = "R" then
+    KBD(VK_RIGHT, DOWN)
+    sleep(0.15)
+    KBD(VK_RIGHT, UP)
+  ELSEIF direction = "U" then
+    KBD(VK_UP, DOWN)
+    sleep(0.15)
+    KBD(VK_UP, UP)
+  ELSEIF direction = "D" then
+    KBD(VK_DOWN, DOWN)
+    sleep(0.15)
+    KBD(VK_DOWN, UP)
+  ELSEIF direction = "A" then
+    break
+  ENDIF
+  KBD(VK_Z, UP)
+  i = i + 1
+wend
+
+print ("終了しました")

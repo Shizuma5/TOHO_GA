@@ -1,0 +1,69 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+n = 11
+
+//20人を順に繰り返す
+while n <= 30
+  record = ""
+  fname = "firstlog" + FORMAT(n, 2) + ".txt"
+
+  //ゲームキャラクターの装備選択画面からスタート
+  sleep(1)
+  KBD(VK_Z, DOWN)
+  sleep(1)
+  KBD(VK_Z, UP)
+  sleep(0.1)
+  KBD(VK_LSHIFT, DOWN)
+
+  //遺伝的アルゴリズムの最初のランダム生成
+  while !(GETKEYSTATE(VK_a))
+    KBD(VK_Z, DOWN, 0.05)
+    IFB CHKIMG("gameover2.bmp")
+      break
+    ENDIF
+    direction = random(100)
+    IFB direction < 5
+      KBD(VK_LEFT, DOWN)
+      record = record + "L"
+      sleep(0.15)
+      KBD(VK_LEFT, UP)
+    ELSEIF direction < 10
+      KBD(VK_RIGHT, DOWN)
+      record = record + "R"
+      sleep(0.15)
+      KBD(VK_RIGHT, UP)
+    ELSEIF direction < 13
+      KBD(VK_UP, DOWN)
+      record = record + "U"
+      sleep(0.15)
+      KBD(VK_UP, UP)
+    ELSEIF direction < 16
+      KBD(VK_DOWN, DOWN)
+      record = record + "D"
+      sleep(0.15)
+      KBD(VK_DOWN, UP)
+    ELSE
+      record = record + "S"
+    ENDIF
+    KBD(VK_Z, UP)
+  wend
+  record = record + "A"
+
+  fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+    FPUT(fileID, record)
+  FCLOSE(fileID)
+
+  sleep(2)
+
+  KBD(VK_LSHIFT, UP)
+  sleep(0.5)
+  KBD(VK_Z)
+  n = n + 1
+wend

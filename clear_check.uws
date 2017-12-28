@@ -1,0 +1,19 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+n = 11
+
+while true
+
+IFB CHKIMG("clear.bmp")
+  print ("clear!")
+  break
+ENDIF
+
+wend

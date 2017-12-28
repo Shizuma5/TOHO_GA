@@ -1,0 +1,130 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+
+n = 11
+
+while n <= 30
+  FILE_FINISH = "false"
+  dname = "generation1/"
+
+  fname = dname + "firstlog" + FORMAT(n, 2) + ".txt"
+
+
+  fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+    record = FGET(fileID, 1)
+  FCLOSE(fileID)
+
+  i = 1
+
+//ゲームキャラクターの装備選択画面からスタート
+  sleep(1)
+  KBD(VK_Z, DOWN)
+  sleep(1)
+  KBD(VK_Z, UP)
+  sleep(0.1)
+  KBD(VK_LSHIFT, DOWN)
+
+  while i <= LENGTH(record)
+    KBD(VK_Z, DOWN, 0.05)
+    IFB CHKIMG("gameover2.bmp")
+      break
+    ENDIF
+    direction = Copy(record, i, 1)
+    IFB direction = "L" then
+      KBD(VK_LEFT, DOWN)
+      sleep(0.15)
+      KBD(VK_LEFT, UP)
+    ELSEIF direction = "R" then
+      KBD(VK_RIGHT, DOWN)
+      sleep(0.15)
+      KBD(VK_RIGHT, UP)
+    ELSEIF direction = "U" then
+      KBD(VK_UP, DOWN)
+      sleep(0.15)
+      KBD(VK_UP, UP)
+    ELSEIF direction = "D" then
+      KBD(VK_DOWN, DOWN)
+      sleep(0.15)
+      KBD(VK_DOWN, UP)
+    ELSEIF direction = "A" then
+      FILE_FINISH = "true"
+      break
+    ENDIF
+    KBD(VK_Z, UP)
+    i = i + 1
+  wend
+
+  IFB FILE_FINISH = "true" then
+
+  //遺伝的アルゴリズムの最初のランダム生成
+    while !(GETKEYSTATE(VK_a))
+      KBD(VK_Z, DOWN, 0.05)
+      IFB CHKIMG("gameover2.bmp")
+        break
+      ENDIF
+      direction = random(100)
+      IFB direction < 5
+        KBD(VK_LEFT, DOWN)
+        record = record + "L"
+        sleep(0.15)
+        KBD(VK_LEFT, UP)
+      ELSEIF direction < 10
+        KBD(VK_RIGHT, DOWN)
+        record = record + "R"
+        sleep(0.15)
+        KBD(VK_RIGHT, UP)
+      ELSEIF direction < 13
+        KBD(VK_UP, DOWN)
+        record = record + "U"
+        sleep(0.15)
+        KBD(VK_UP, UP)
+      ELSEIF direction < 16
+        KBD(VK_DOWN, DOWN)
+        record = record + "D"
+        sleep(0.15)
+        KBD(VK_DOWN, UP)
+      ELSE
+        record = record + "S"
+      ENDIF
+      KBD(VK_Z, UP)
+    wend
+
+    record = REPLACE(record, "A", "")
+
+    record = record + "A"
+
+    fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+      FPUT(fileID, record)
+    FCLOSE(fileID)
+  ENDIF
+
+  sleep(1)
+
+  for j = 1 to 4
+    Z_DOWN
+  next
+
+  PRINT ("FILE")
+  PRINT (n)
+  PRINT ("が終了しました\n")
+
+  n = n + 1
+
+wend
+
+print ("終了しました")
+
+FUNCTION Z_DOWN()
+  KBD(VK_Z, DOWN)
+  sleep(0.1)
+  KBD(VK_Z, UP)
+  sleep(0.1)
+  result = 0
+FEND

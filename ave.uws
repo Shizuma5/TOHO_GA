@@ -1,0 +1,20 @@
+i = 1
+while i < 77
+  dname = "generation" + i + "/"
+
+    j = 0
+    sum = 0
+    while j < 40
+      j = j + 1
+      fname = dname + "log" + j + ".txt"
+
+      fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+        record = FGET(fileID, 1)
+      FCLOSE(fileID)
+
+      sum = sum + length(record)
+    wend
+    ave = sum / 40.0
+  print (ave)
+  i = i + 1
+wend

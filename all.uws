@@ -1,0 +1,29 @@
+
+generation_num = 1
+
+while generation_num < 77
+n = 11
+
+record = ""
+f = ""
+size = 0
+
+while n <= 40
+  dname = "generation" + generation_num + "/"
+  fname = dname + "log" + FORMAT(n, 2) + ".txt"
+
+  fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+    record = FGET(fileID, 1)
+  FCLOSE(fileID)
+
+  if size < length(record)
+    size = length(record)
+    f = fname
+  ENDIF
+
+  n = n + 1
+wend
+print (f)
+
+generation_num = generation_num + 1
+wend

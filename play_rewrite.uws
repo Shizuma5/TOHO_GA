@@ -1,0 +1,209 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+n = 11
+
+generation_num = 2
+no_con = false
+
+while n <= 40
+  FILE_FINISH = "false"
+  out_record = ""
+  dname = "generation" + generation_num + "/"
+  fname = dname + "log" + FORMAT(n, 2) + ".txt"
+
+  fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+    record = FGET(fileID, 1)
+  FCLOSE(fileID)
+
+  i = 1
+
+//ゲームキャラクターの装備選択画面からスタート
+  sleep(1)
+  KBD(VK_Z, DOWN)
+  sleep(1)
+  KBD(VK_Z, UP)
+  sleep(0.1)
+  KBD(VK_LSHIFT, DOWN)
+
+  while i <= LENGTH(record)
+    KBD(VK_Z, DOWN, 0.01)
+    IFB CHKIMG("gameover2.bmp")
+      sleep(2)
+      IFB CHKIMG("nocon.bmp")
+        print ("no_contest")
+        no_con = true
+        record = ""
+        sleep(1)
+        KBD(VK_Z, DOWN)
+        sleep(0.05)
+        KBD(VK_Z, UP)
+        sleep(2)
+        j = 0
+        while j < 4
+          KBD(VK_Z, DOWN)
+          sleep(0.1)
+          KBD(VK_Z, UP)
+          j = j + 1
+          sleep(2)
+        wend
+      ENDIF
+      break
+    ENDIF
+    IFB CHKIMG("clear.bmp")
+      print("clear!")
+      record = record + "C"
+      break
+    ENDIF
+    direction = Copy(record, i, 1)
+    IFB direction = "L" then
+      out_record = out_record + "L"
+      KBD(VK_LEFT, DOWN)
+      sleep(0.15)
+      KBD(VK_LEFT, UP)
+    ELSEIF direction = "R" then
+      KBD(VK_RIGHT, DOWN)
+      out_record = out_record + "R"
+      sleep(0.15)
+      KBD(VK_RIGHT, UP)
+    ELSEIF direction = "U" then
+      out_record = out_record + "U"
+      KBD(VK_UP, DOWN)
+      sleep(0.15)
+      KBD(VK_UP, UP)
+    ELSEIF direction = "D" then
+      out_record = out_record + "D"
+      KBD(VK_DOWN, DOWN)
+      sleep(0.15)
+      KBD(VK_DOWN, UP)
+    ELSEIF direction = "S" then
+      out_record = out_record + "S"
+    ELSEIF direction = "A" then
+      FILE_FINISH = "true"
+      break
+    ENDIF
+    KBD(VK_Z, UP)
+    i = i + 1
+  wend
+
+  IFB FILE_FINISH = "true" then
+
+  //遺伝的アルゴリズムの最初のランダム生成
+    while !(GETKEYSTATE(VK_a))
+      KBD(VK_Z, DOWN, 0.01)
+      IFB CHKIMG("gameover2.bmp")
+        sleep(2)
+        IFB CHKIMG("nocon.bmp")
+          print ("no_contest")
+          no_con = true
+          record = ""
+          sleep(1)
+          KBD(VK_Z, DOWN)
+          sleep(0.05)
+          KBD(VK_Z, UP)
+          sleep(2)
+          j = 0
+          while j < 3
+            KBD(VK_Z, DOWN)
+            sleep(0.1)
+            KBD(VK_Z, UP)
+            j = j + 1
+            sleep(2)
+          wend
+        ENDIF
+        break
+      ENDIF
+      IFB CHKIMG("clear.bmp")
+        print("clear!")
+        record = record + "C"
+        break
+      ENDIF
+      direction = random(100)
+      IFB direction < 5
+        KBD(VK_LEFT, DOWN)
+        record = record + "L"
+        sleep(0.15)
+        KBD(VK_LEFT, UP)
+      ELSEIF direction < 10
+        KBD(VK_RIGHT, DOWN)
+        record = record + "R"
+        sleep(0.15)
+        KBD(VK_RIGHT, UP)
+      ELSEIF direction < 13
+        KBD(VK_UP, DOWN)
+        record = record + "U"
+        sleep(0.15)
+        KBD(VK_UP, UP)
+      ELSEIF direction < 16
+        KBD(VK_DOWN, DOWN)
+        record = record + "D"
+        sleep(0.15)
+        KBD(VK_DOWN, UP)
+      ELSE
+        record = record + "S"
+      ENDIF
+      KBD(VK_Z, UP)
+    wend
+
+    record = REPLACE(record, "A", "")
+
+    record = record + "A"
+    IFB no_con
+      n = n - 1
+      no_con = false
+    ELSE
+      fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+        FPUT(fileID, record)
+      FCLOSE(fileID)
+      i = 0
+      while i < 7
+        Z_DOWN()
+        i = i + 1
+      wend
+    ENDIF
+  ELSE  //FILE_FINISHがfalse
+    IFB no_con
+      n = n - 1
+      no_con = false
+    ELSE
+      out_record = out_record + "A"
+      fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+        FPUT(fileID, out_record)
+      FCLOSE(fileID)
+      sleep(1)
+      i = 0
+      while i < 7
+        Z_DOWN()
+        i = i + 1
+      wend
+    ENDIF
+  ENDIF
+
+  //クリアチェック
+  IFB POS("C", record)
+    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    print(output)
+    EXITEXIT
+  ELSEIF POS("C", out_record)
+    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    print(output)
+    EXITEXIT
+  ENDIF
+
+  n = n + 1
+wend
+
+print ("終了しました")
+
+FUNCTION Z_DOWN()
+  KBD(VK_Z, DOWN)
+  sleep(0.1)
+  KBD(VK_Z, UP)
+  sleep(2)
+FEND

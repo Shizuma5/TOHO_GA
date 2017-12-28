@@ -1,0 +1,78 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+fname = "generation76/log26.txt"
+
+fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+  record = FGET(fileID, 1)
+FCLOSE(fileID)
+
+i = 1
+
+//ゲームキャラクターの装備選択画面からスタート
+sleep(1)
+KBD(VK_Z, DOWN)
+sleep(1)
+KBD(VK_Z, UP)
+sleep(0.1)
+KBD(VK_LSHIFT, DOWN)
+
+
+  while i <= LENGTH(record)
+    KBD(VK_Z, DOWN, 0.01)
+    IFB CHKIMG("gameover2.bmp")
+      sleep(2)
+      IFB CHKIMG("nocon.bmp")
+        no_con = true
+        record = ""
+        sleep(1)
+        KBD(VK_Z, DOWN)
+        sleep(0.05)
+        KBD(VK_Z, UP)
+        sleep(2)
+        j = 0
+        while j < 5
+          KBD(VK_Z, DOWN)
+          sleep(0.1)
+          KBD(VK_Z, UP)
+          j = j + 1
+          sleep(2)
+        wend
+      ENDIF
+      break
+    ENDIF
+    IFB CHKIMG("clear.bmp")
+      record = record + "C"
+      break
+    ENDIF
+    direction = Copy(record, i, 1)
+    IFB direction = "L" then
+      KBD(VK_LEFT, DOWN)
+      sleep(0.15)
+      KBD(VK_LEFT, UP)
+    ELSEIF direction = "R" then
+      KBD(VK_RIGHT, DOWN)
+      sleep(0.15)
+      KBD(VK_RIGHT, UP)
+    ELSEIF direction = "U" then
+      KBD(VK_UP, DOWN)
+      sleep(0.15)
+      KBD(VK_UP, UP)
+    ELSEIF direction = "D" then
+      KBD(VK_DOWN, DOWN)
+      sleep(0.15)
+      KBD(VK_DOWN, UP)
+    ELSEIF direction = "S" then
+    ELSEIF direction = "A" then
+      FILE_FINISH = "true"
+      break
+    ENDIF
+    KBD(VK_Z, UP)
+    i = i + 1
+  wend

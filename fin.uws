@@ -1,0 +1,470 @@
+id = getid("東") // 東方project（仮）のウィンドウIDを取得
+
+ifb status(id, ST_ICON) // ウィンドウがアイコン状態（最小化）かチェック
+ ctrlwin(id, NORMAL) // 表示を通常にする
+endif
+ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
+ ctrlwin(id, ACTIVATE) // アクティブにする
+endif
+
+
+generation_num = 65
+
+//無限ループ（クリアする世代が出るまで）
+while true
+
+n = 11
+
+no_con = false
+
+while n <= 40
+  FILE_FINISH = "false"
+  out_record = ""
+  dname = "generation" + generation_num + "/"
+  fname = dname + "log" + FORMAT(n, 2) + ".txt"
+
+  fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+    record = FGET(fileID, 1)
+  FCLOSE(fileID)
+
+  i = 1
+
+//ゲームキャラクターの装備選択画面からスタート
+  sleep(1)
+  KBD(VK_Z, DOWN)
+  sleep(1)
+  KBD(VK_Z, UP)
+  sleep(0.1)
+  KBD(VK_LSHIFT, DOWN)
+
+  while i <= LENGTH(record)
+    KBD(VK_Z, DOWN, 0.01)
+    IFB CHKIMG("gameover2.bmp")
+      sleep(2)
+      IFB CHKIMG("nocon.bmp")
+        no_con = true
+        record = ""
+        sleep(1)
+        KBD(VK_Z, DOWN)
+        sleep(0.05)
+        KBD(VK_Z, UP)
+        sleep(2)
+        j = 0
+        while j < 5
+          KBD(VK_Z, DOWN)
+          sleep(0.1)
+          KBD(VK_Z, UP)
+          j = j + 1
+          sleep(2)
+        wend
+      ENDIF
+      break
+    ENDIF
+    IFB CHKIMG("clear.bmp")
+      record = record + "C"
+      break
+    ENDIF
+    direction = Copy(record, i, 1)
+    IFB direction = "L" then
+      out_record = out_record + "L"
+      KBD(VK_LEFT, DOWN)
+      sleep(0.15)
+      KBD(VK_LEFT, UP)
+    ELSEIF direction = "R" then
+      KBD(VK_RIGHT, DOWN)
+      out_record = out_record + "R"
+      sleep(0.15)
+      KBD(VK_RIGHT, UP)
+    ELSEIF direction = "U" then
+      out_record = out_record + "U"
+      KBD(VK_UP, DOWN)
+      sleep(0.15)
+      KBD(VK_UP, UP)
+    ELSEIF direction = "D" then
+      out_record = out_record + "D"
+      KBD(VK_DOWN, DOWN)
+      sleep(0.15)
+      KBD(VK_DOWN, UP)
+    ELSEIF direction = "S" then
+      out_record = out_record + "S"
+    ELSEIF direction = "A" then
+      FILE_FINISH = "true"
+      break
+    ENDIF
+    KBD(VK_Z, UP)
+    i = i + 1
+  wend
+
+  IFB FILE_FINISH = "true" then
+
+  //遺伝的アルゴリズムの最初のランダム生成
+    while !(GETKEYSTATE(VK_a))
+      KBD(VK_Z, DOWN, 0.01)
+      IFB CHKIMG("gameover2.bmp")
+        sleep(2)
+        IFB CHKIMG("nocon.bmp")
+          no_con = true
+          record = ""
+          sleep(1)
+          KBD(VK_Z, DOWN)
+          sleep(0.05)
+          KBD(VK_Z, UP)
+          sleep(2)
+          j = 0
+          while j < 3
+            KBD(VK_Z, DOWN)
+            sleep(0.1)
+            KBD(VK_Z, UP)
+            j = j + 1
+            sleep(2)
+          wend
+        ENDIF
+        break
+      ENDIF
+      IFB CHKIMG("clear.bmp")
+        record = record + "C"
+        break
+      ENDIF
+      direction = random(100)
+      IFB direction < 5
+        KBD(VK_LEFT, DOWN)
+        record = record + "L"
+        sleep(0.15)
+        KBD(VK_LEFT, UP)
+      ELSEIF direction < 10
+        KBD(VK_RIGHT, DOWN)
+        record = record + "R"
+        sleep(0.15)
+        KBD(VK_RIGHT, UP)
+      ELSEIF direction < 13
+        KBD(VK_UP, DOWN)
+        record = record + "U"
+        sleep(0.15)
+        KBD(VK_UP, UP)
+      ELSEIF direction < 16
+        KBD(VK_DOWN, DOWN)
+        record = record + "D"
+        sleep(0.15)
+        KBD(VK_DOWN, UP)
+      ELSE
+        record = record + "S"
+      ENDIF
+      KBD(VK_Z, UP)
+    wend
+
+    record = REPLACE(record, "A", "")
+
+    record = record + "A"
+    IFB no_con
+      n = n - 1
+      no_con = false
+    ELSE
+      fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+        FPUT(fileID, record)
+      FCLOSE(fileID)
+      i = 0
+      while i < 8
+        Z_DOWN()
+        i = i + 1
+      wend
+    ENDIF
+  ELSE  //FILE_FINISHがfalse
+    IFB no_con
+      n = n - 1
+      no_con = false
+    ELSE
+      out_record = out_record + "A"
+      fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+        FPUT(fileID, out_record)
+      FCLOSE(fileID)
+      sleep(1)
+      i = 0
+      while i < 8
+        Z_DOWN()
+        i = i + 1
+      wend
+    ENDIF
+  ENDIF
+
+  //クリアチェック
+  IFB POS("C", record)
+    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    print (output)
+    EXITEXIT
+  ELSEIF POS("C", out_record)
+    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    print (output)
+    EXITEXIT
+  ENDIF
+
+
+  x = "log" + n + "が終わりました"
+  print (x)
+
+
+  n = n + 1
+wend
+
+
+//ここから選択交叉
+
+
+
+
+//エリート保存
+
+dname = "generation" + generation_num + "/"
+
+i = 11
+
+DIM list_num[29]
+DIM next_generation[9]
+DIM child[29]
+HASHTBL progress = HASH_CASECARE
+
+while i <= 40
+  fname = dname + "log" + FORMAT(i, 2) + ".txt"
+  fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
+    record = FGET(fileID, 1)
+  FCLOSE(fileID)
+  list_num[i-11] = length(record)
+  IFB progress[list_num[i-11], HASH_EXISTS]
+    progress[list_num[i-11] + 1] = record + "A"
+  ELSE
+    progress[list_num[i-11]] = record
+  ENDIF
+  i = i + 1
+wend
+
+QSORT(list_num, 1)
+
+i = 0
+while i < 10
+  next_generation[i] = list_num[i]
+  i = i + 1
+wend
+
+//エリート保存
+
+//ここから親選択
+
+child_num = 0
+DIM generation_sum[9]
+//10ペアの親から３０人の子孫を残す
+k = 0
+while k < 10
+    //親を二人選ぶ(ルーレット選択？)
+    i = 0
+    sum = 0
+    //10人の親のコマンドの合計を出す
+    while i < 10
+      sum = sum + next_generation[i]
+      i = i + 1
+    wend
+
+  //その合計以下の乱数を生成
+  random_num = random(sum)
+
+  i = 0
+  sum = 0
+  //i以下の親のコマンドの合計を出す
+  while i < 10
+    sum = sum + next_generation[i]
+    generation_sum[i] = sum
+    i = i + 1
+  wend
+
+  //乱数を用いて親1を決定する
+  i = 0
+  while i < 10
+    IFB random_num < generation_sum[i]
+      pa1 = i
+      break
+    ENDIF
+    i = i + 1
+  wend
+
+  //同様の手順で親2を決定する
+  j = 0
+  sum = 0
+  while j < 10
+    IFB j = i then
+    ELSE
+      sum = sum + next_generation[j]
+      generation_sum[j] = sum
+    ENDIF
+    j = j + 1
+  wend
+
+  random_num = random(sum)
+
+  i = 0
+  while i < 10
+    IFB random_num < generation_sum[i]
+      pa2 = i
+      break
+    ENDIF
+    i = i + 1
+  wend
+
+  parent1 = progress[next_generation[pa1]]
+  parent2 = progress[next_generation[pa2]]
+
+  //ここまでが親選択
+
+
+//ここから交叉
+
+parent_check = next_generation[pa1] - next_generation[pa2]
+handle_num = ABS(parent_check)
+
+i = 0
+
+//交叉前の親の要素を合わせる
+//parent2に足す
+IFB parent_check > 0 then
+  while i < handle_num
+    direction = random(100)
+    IFB direction < 5
+      parent2 = parent2 + "L"
+    ELSEIF direction < 10
+      parent2 = parent2 + "R"
+    ELSEIF direction < 13
+      parent2 = parent2 + "U"
+    ELSEIF direction < 16
+      parent2 = parent2 + "D"
+    ELSE
+      parent2 = parent2 + "S"
+    ENDIF
+    i = i + 1
+  wend
+  parent2 = REPLACE(parent2, "A", "")
+  parent2 = parent2 + "A"
+
+ELSEIF parent_check < 0 then
+  while i < handle_num
+    direction = random(100)
+    IFB direction < 5
+      parent1 = parent1 + "L"
+    ELSEIF direction < 10
+      parent1 = parent1 + "R"
+    ELSEIF direction < 13
+      parent1 = parent1 + "U"
+    ELSEIF direction < 16
+      parent1 = parent1 + "D"
+    ELSE
+      parent1 = parent1 + "S"
+    ENDIF
+    i = i + 1
+  wend
+  parent1 = REPLACE(parent1, "A", "")
+  parent1 = parent1 + "A"
+ENDIF
+
+
+//２点交叉から二人、一様交叉から一人の計三人を一組の親から作る
+
+//2点交叉
+//親のコマンド長さの数以下の乱数（交叉ポイント）
+crossing_point = random(length(parent1))
+
+//交叉
+crossing1 = copy(parent1, 1, crossing_point) + copy(parent2, crossing_point+1)
+crossing2 = copy(parent2, 1, crossing_point) + copy(parent1, crossing_point+1)
+
+crossing_point2 = random(length(parent1))
+
+child1 = copy(crossing1, 1, crossing_point2) + copy(crossing2, crossing_point2+1)
+child2 = copy(crossing2, 1, crossing_point2) + copy(crossing1, crossing_point2+1)
+
+//一様交叉
+child3 = ""
+i = 0
+while i < length(parent1)
+  SELECT random(2)
+    case 0
+      child3 = child3 + copy(parent1, i, 1)
+    case 1
+      child3 = child3 + copy(parent2, i, 1)
+  SELEND
+  i = i + 1
+wend
+
+//子孫の配列にそれぞれの子孫を追加する
+child[child_num] = child1
+child_num = child_num + 1
+child[child_num] = child2
+child_num = child_num + 1
+child[child_num] = child3
+child_num = child_num + 1
+
+k = k + 1
+wend
+
+//ここまでが交叉と子孫残し
+
+//突然変異(確率は1パーセント)
+i = 0
+while i < 30
+  //乱数生成かつswitch文
+  SELECT random(100)
+    case 0
+      //突然変異するポイント２か所の決定
+      mutation_point1 = random(length(child[i]))
+      mutation_char1 = copy(child[i], mutation_point1, 1)
+      mutation_point2 = random(length(child[i]))
+      mutation_char2 = copy(child[i], mutation_point2, 1)
+
+      //突然変異させる
+      //一つ目のポイント引く１の場所までを切りだし、
+      //二つ目のポイントの文字列を足し、二つ目のポイントまでの文字列を切りだし、
+      //一つ目のポイントの文字列を足し、最後の部分を補完するという形で実装
+      IFB mutation_point1 < mutation_point2
+        child_char = copy(child[i], 1, mutation_point1-1)
+        chlid_char = child_char + mutation_char2
+        child_char = child_char + copy(child[i], mutation_point1+1, mutation_point2-1)
+        child_char = child_char + mutation_char1
+        child_char = child_char + copy(child[i], mutation_point2+1)
+      ELSEIF mutation_point2 < mutation_point1
+        child_char = copy(child[i], 1, mutation_point2-1)
+        chlid_char = child_char + mutation_char1
+        child_char = child_char + copy(child[i], mutation_point2+1, mutation_point1-1)
+        child_char = child_char + mutation_char2
+        child_char = child_char + copy(child[i], mutation_point1+1)
+      ELSEIF mutation_point1 = mutation_point2
+        child_char = child[i]
+      ENDIF
+
+      child[i] = child_char
+  SELEND
+  i = i + 1
+wend
+
+//子孫のディレクトリ名作成
+generation_num = generation_num + 1
+dname = "generation" + generation_num
+
+//ファイルを書き込むためのディレクトリの作成
+mkdir_path = "mkdir c:\Users\Shizuma\Desktop\game\" + dname
+Doscmd(mkdir_path)
+
+//子孫の遺伝子データを書き出す
+i = 11
+while i <= 40
+  fname = dname + "/log" + i + ".txt"
+  fileID = FOPEN(fname, F_WRITE)  //ファイルを書き込み形式で開く
+    FPUT(fileID, child[i-11])
+  FCLOSE(fileID)
+  i = i + 1
+wend
+
+wend
+//無限ループ終了
+
+FUNCTION Z_DOWN()
+  KBD(VK_Z, DOWN)
+  sleep(0.1)
+  KBD(VK_Z, UP)
+  sleep(2)
+  result = 0
+FEND
