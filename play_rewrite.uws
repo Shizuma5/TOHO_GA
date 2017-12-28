@@ -15,7 +15,7 @@ no_con = false
 while n <= 40
   FILE_FINISH = "false"
   out_record = ""
-  dname = "generation" + generation_num + "/"
+  dname = "generation/generation" + generation_num + "/"
   fname = dname + "log" + FORMAT(n, 2) + ".txt"
 
   fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
@@ -187,11 +187,11 @@ while n <= 40
 
   //クリアチェック
   IFB POS("C", record)
-    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    output = "generation/generation" + generation_num + "のファイル" + n + "がクリアしました"
     print(output)
     EXITEXIT
   ELSEIF POS("C", out_record)
-    output = "generation" + generation_num + "のファイル" + n + "がクリアしました"
+    output = "generation/generation" + generation_num + "のファイル" + n + "がクリアしました"
     print(output)
     EXITEXIT
   ENDIF

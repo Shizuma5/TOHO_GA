@@ -7,7 +7,7 @@ ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
  ctrlwin(id, ACTIVATE) // アクティブにする
 endif
 
-fname = "generation76/log26.txt"
+fname = "generation/generation76/log26.txt"
 
 fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
   record = FGET(fileID, 1)

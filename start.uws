@@ -12,7 +12,7 @@ n = 11
 
 while n <= 30
   FILE_FINISH = "false"
-  dname = "generation1/"
+  dname = "generation/generation1/"
 
   fname = dname + "firstlog" + FORMAT(n, 2) + ".txt"
 

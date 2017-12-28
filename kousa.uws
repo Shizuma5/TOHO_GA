@@ -6,7 +6,7 @@
 
 //エリート保存方式（十人残す）
 
-  dir = "generation"
+  dir = "generation/generation"
 
   dname = dir + generation_num + "/"
 

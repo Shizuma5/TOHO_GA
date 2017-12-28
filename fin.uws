@@ -8,7 +8,7 @@ ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
 endif
 
 
-generation_num = 65
+generation_num = 1
 
 //無限ループ（クリアする世代が出るまで）
 while true
@@ -20,7 +20,7 @@ no_con = false
 while n <= 40
   FILE_FINISH = "false"
   out_record = ""
-  dname = "generation" + generation_num + "/"
+  dname = "generation/generation" + generation_num + "/"
   fname = dname + "log" + FORMAT(n, 2) + ".txt"
 
   fileID = FOPEN(fname, F_READ) // 読み込みモードでファイルを開く
@@ -213,7 +213,7 @@ wend
 
 //エリート保存
 
-dname = "generation" + generation_num + "/"
+dname = "generation/generation" + generation_num + "/"
 
 i = 11
 
@@ -442,7 +442,7 @@ wend
 
 //子孫のディレクトリ名作成
 generation_num = generation_num + 1
-dname = "generation" + generation_num
+dname = "generation/generation" + generation_num
 
 //ファイルを書き込むためのディレクトリの作成
 mkdir_path = "mkdir c:\Users\Shizuma\Desktop\game\" + dname

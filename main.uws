@@ -8,7 +8,7 @@ ifb !status(id, ST_ACTIVE) // ウィンドウがアクティブかチェック
 endif
 
 
-fileID = FOPEN("firstlog2.txt", F_READ) // 読み込みモードでファイルを開く
+fileID = FOPEN("g1/firstlog2.txt", F_READ) // 読み込みモードでファイルを開く
 record = FGET(fileID, 1)
 FCLOSE(fileID)
 

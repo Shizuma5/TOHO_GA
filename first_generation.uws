@@ -9,7 +9,7 @@ endif
 
 n = 11
 
-dname = "generation1/"
+dname = "generation/generation1/"
 
 no_con = false
 
